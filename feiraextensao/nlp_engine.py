@@ -4,8 +4,8 @@ e Recuperação de Informação) desenvolvido para a Feira de Extensão — SCC0
 
 Público-alvo: Estudantes de Ensino Médio (16–18 anos) e visitantes da feira.
 Utiliza:
-- spaCy (`pt_core_news_sm`) para tokenização, POS Tagging (Universal POS Tags),
-  feições morfológicas (`morph`), análise sintática (`dep_`) e lematização (`lemma_`).
+- spaCy (`pt_core_news_sm`) para tokenização, POS Tagging (Universal POS Tags)
+  e lematização (`lemma_`).
 - NLTK (`nltk.corpus.stopwords` e `nltk.stem.RSLPStemmer`) para comparação entre
   Stemming tradicional e Lematização Contextualizada guiada por classe gramatical.
 """
@@ -13,7 +13,7 @@ Utiliza:
 from __future__ import annotations
 
 import functools
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List
 
 import nltk
@@ -73,85 +73,60 @@ def carregar_recursos_nlp():
 
 POS_INFO: Dict[str, Dict[str, str]] = {
     "SUB": {
-        "codigo_tecnico": "NOUN / PROPN",
         "nome_exibicao": "Substantivo",
         "nome_curto": "Substantivo",
-        "papel": "Entidades, objetos, lugares, conceitos e nomes próprios",
+        "papel": "Coisas, lugares, pessoas e ideias",
         "icone": "📘",
         "cor_fundo": "#EFF6FF",
         "cor_borda": "#2563EB",
         "cor_texto": "#1E3A8A",
-        "explicacao": "Nomeia seres, objetos, lugares, ideias ou marcas. Nos buscadores, os substantivos costumam ser os termos principais do índice.",
-        "exemplos": "jogo, rio, algoritmo, música, faculdade, celular",
-        "peso_ri": "Alto (Indexado como termo-chave)",
     },
     "VERB": {
-        "codigo_tecnico": "VERB / AUX",
         "nome_exibicao": "Verbo",
         "nome_curto": "Verbo",
-        "papel": "Ações, processos, estados e fenômenos",
+        "papel": "Ações e estados",
         "icone": "⚡",
         "cor_fundo": "#FEF2F2",
         "cor_borda": "#DC2626",
         "cor_texto": "#7F1D1D",
-        "explicacao": "Indica ação, estado ou acontecimento. Como varia muito em tempo e pessoa, precisa ser reduzido ao infinitivo (lema) para a busca funcionar bem.",
-        "exemplos": "jogar, rir, correr, programar, cantar, viajar",
-        "peso_ri": "Alto (Lematizado para o infinitivo)",
     },
     "ADJ": {
-        "codigo_tecnico": "ADJ",
         "nome_exibicao": "Adjetivo",
         "nome_curto": "Adjetivo",
-        "papel": "Características, qualidades e estados atribuídos a um substantivo",
+        "papel": "Características de um substantivo",
         "icone": "✨",
         "cor_fundo": "#F5F3FF",
         "cor_borda": "#7C3AED",
         "cor_texto": "#4C1D95",
-        "explicacao": "Modifica um substantivo dando uma propriedade ou avaliação. Essencial para buscas específicas e análise de sentimento.",
-        "exemplos": "rápido, incrível, difícil, gelado, absurdo, novo",
-        "peso_ri": "Médio-Alto (Refina a busca)",
     },
     "ADV": {
-        "codigo_tecnico": "ADV",
         "nome_exibicao": "Advérbio",
         "nome_curto": "Advérbio",
-        "papel": "Modificador de verbo, adjetivo ou da frase inteira (tempo, modo, intensidade, negação)",
+        "papel": "Modo, tempo, intensidade ou negação",
         "icone": "🎯",
         "cor_fundo": "#FFFBEB",
         "cor_borda": "#D97706",
         "cor_texto": "#78350F",
-        "explicacao": "Indica circunstâncias (intensidade, tempo, lugar, negação). Palavras como «não» mudam totalmente o sentido de uma busca!",
-        "exemplos": "muito, não, hoje, rápido, demais, perto",
-        "peso_ri": "Médio (Contextualizador)",
     },
     "PRON": {
-        "codigo_tecnico": "PRON",
         "nome_exibicao": "Pronome",
         "nome_curto": "Pronome",
-        "papel": "Substitui ou acompanha os nomes indicando as pessoas do discurso",
+        "papel": "Indica pessoas (eu, ele, isso)",
         "icone": "👤",
         "cor_fundo": "#FDF2F8",
         "cor_borda": "#DB2777",
         "cor_texto": "#831843",
-        "explicacao": "Retoma ou aponta quem realiza a ação («eu», «ele», «isso»). Ajuda a IA a descobrir que a próxima palavra é um verbo, mas geralmente é filtrado na indexação.",
-        "exemplos": "eu, você, ele, nós, meu, esse, nada",
-        "peso_ri": "Baixo (Usado no contexto, filtrado no índice)",
     },
     "CON": {
-        "codigo_tecnico": "DET / ADP / CCONJ / SCONJ",
         "nome_exibicao": "Conector / Funcional",
         "nome_curto": "Conector",
-        "papel": "Artigos, preposições e conjunções que estruturam a sintaxe",
+        "papel": "Artigos, preposições e conjunções",
         "icone": "🔗",
         "cor_fundo": "#F1F5F9",
         "cor_borda": "#64748B",
         "cor_texto": "#334155",
-        "explicacao": "Palavras funcionais (artigos, preposições, conjunções). São cruciais para determinar a classe da palavra seguinte, mas são removidas como Stop Words no motor de busca.",
-        "exemplos": "o, a, de, no, para, com, mas, quando, que",
-        "peso_ri": "Stop Word (Removida após análise sintática)",
     },
     "NUM": {
-        "codigo_tecnico": "NUM",
         "nome_exibicao": "Numeral",
         "nome_curto": "Numeral",
         "papel": "Quantidades, datas, ordens e medidas",
@@ -159,12 +134,8 @@ POS_INFO: Dict[str, Dict[str, str]] = {
         "cor_fundo": "#F0FDFA",
         "cor_borda": "#0D9488",
         "cor_texto": "#134E4A",
-        "explicacao": "Quantifica elementos ou indica posição/ano.",
-        "exemplos": "dois, 2026, primeiro, mil, 10",
-        "peso_ri": "Médio (Filtros exatos)",
     },
     "PUNCT": {
-        "codigo_tecnico": "PUNCT",
         "nome_exibicao": "Pontuação",
         "nome_curto": "Pontuação",
         "papel": "Delimitadores sintáticos e entonação",
@@ -172,9 +143,6 @@ POS_INFO: Dict[str, Dict[str, str]] = {
         "cor_fundo": "#F8FAFC",
         "cor_borda": "#94A3B8",
         "cor_texto": "#475569",
-        "explicacao": "Delimita orações e expressa entonação; descartada no índice invertido.",
-        "exemplos": ". , ! ? :",
-        "peso_ri": "Ignorada no índice",
     },
 }
 
@@ -248,14 +216,11 @@ class TokenAnalisado:
     normalizado: str
     classe: str
     upos_spacy: str
-    dep_spacy: str
-    morfologia_spacy: str
     lema: str
     stem_nltk: str
     pista_contexto: str
     eh_stopword: bool
     eh_ambigua: bool = False
-    outras_classes_possiveis: List[str] = field(default_factory=list)
 
 
 # ============================================================================
@@ -485,13 +450,11 @@ def analisar_frase(frase: str) -> List[TokenAnalisado]:
         lema = lemas_finais[i]
 
         eh_ambigua = norm in PALAVRAS_AMB
-        outras_classes = list(PALAVRAS_AMB.get(norm, {}).keys())
 
         stem = stemmer.stem(norm) if classe != "PUNCT" else norm
         eh_stopword = classe in ("CON", "PRON", "PUNCT") or (norm in stop_pt and classe not in ("SUB", "VERB", "ADJ"))
 
         pista = gerar_explicacao_contexto(i, tokens_norm, tags_finais, lema, eh_ambigua)
-        morf_str = str(tok.morph) if str(tok.morph) else "—"
 
         resultado.append(
             TokenAnalisado(
@@ -499,14 +462,11 @@ def analisar_frase(frase: str) -> List[TokenAnalisado]:
                 normalizado=norm,
                 classe=classe,
                 upos_spacy=upos,
-                dep_spacy=tok.dep_ or "—",
-                morfologia_spacy=morf_str,
                 lema=lema,
                 stem_nltk=stem,
                 pista_contexto=pista,
                 eh_stopword=eh_stopword,
                 eh_ambigua=eh_ambigua,
-                outras_classes_possiveis=outras_classes,
             )
         )
 
@@ -620,7 +580,7 @@ def buscar_documentos(consulta: str) -> Dict[str, object]:
             if t_d.classe == "PUNCT":
                 continue
             if t_d.normalizado in palavras_brutas or (not t_d.eh_stopword and t_d.stem_nltk in stems_consulta):
-                item_str = f"«{t_d.texto}» (radical: `{t_d.stem_nltk}`)"
+                item_str = f"«{t_d.texto}» (radical {t_d.stem_nltk})"
                 if item_str not in matches_brutos:
                     matches_brutos.append(item_str)
 
@@ -638,7 +598,7 @@ def buscar_documentos(consulta: str) -> Dict[str, object]:
         for t_q in termos_semanticos:
             for t_d in tokens_doc:
                 if t_d.lema == t_q.lema and t_d.classe == t_q.classe:
-                    descricao = f"«{t_d.texto}» → `{t_d.lema}` ({POS_INFO[t_d.classe]['nome_curto']})"
+                    descricao = f"«{t_d.texto}» → {t_d.lema} ({POS_INFO[t_d.classe]['nome_curto']})"
                     if descricao not in matches_pos:
                         matches_pos.append(descricao)
 
